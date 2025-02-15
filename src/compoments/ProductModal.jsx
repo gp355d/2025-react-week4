@@ -12,8 +12,9 @@ function ProductModal({
   getProducts,
 }) {
   const productModalRef = useRef(null);
+  const fileInputRef = useRef(null);
   //防止直接修改外部傳入的tempProduct設定一個內部的modalData狀態
-  const [modalData, setModalData] = useState(tempProduct);
+  const [modalData, setModalData] = useState({...tempProduct});
   //開啟產品modal
   useEffect(() => {
     if (isProductModalOpen) {
@@ -27,6 +28,10 @@ function ProductModal({
     const modalInstance = Modal.getInstance(productModalRef.current);
     modalInstance.hide();
     setIsProductModalOpen(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // 清空圖片上傳的欄位
+    }
+    
   };
 
   // tempProduct更新時，更新modalData
@@ -34,6 +39,7 @@ function ProductModal({
     setModalData({
       ...tempProduct,
     });
+    
   }, [tempProduct]);
 
   //判斷執行行為的為新增或更新的API
@@ -111,8 +117,8 @@ function ProductModal({
     const newImages = [...modalData.imagesUrl];
     newImages[index] = value;
 
-    modalData({
-      ...tempProduct,
+    setModalData({
+      ...modalData,
       imagesUrl: newImages
     });
   };
@@ -120,8 +126,8 @@ function ProductModal({
   const handleAddImage = () => {
     const newImages = [...modalData.imagesUrl, ''];
 
-    modalData({
-      ...tempProduct,
+    setModalData({
+      ...modalData,
       imagesUrl: newImages,
     });
   };
@@ -131,8 +137,8 @@ function ProductModal({
 
     newImages.pop();
 
-    modalData({
-      ...tempProduct,
+    setModalData({
+      ...modalData,
       imagesUrl: newImages,
     });
   };
@@ -141,11 +147,11 @@ function ProductModal({
    }
   return (
 <>
-      <div ref={productModalRef} id="productModal" className="modal" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div ref={productModalRef} id="productModal" aria-hidden="true" tabIndex="-1" className="modal" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content border-0 shadow">
             <div className="modal-header border-bottom">
-              <h5 className="modal-title fs-4">{modalMode === 'add' ? '新增產品' : '編輯產品'}</h5>
+              <h5 className="modal-title fs-4">{modalMode!== 'edit' ? '新增產品' : '編輯產品'}</h5>
               <button onClick={handleCloseProductModal} type="button" className="btn-close" aria-label="Close"></button>
             </div>
 
@@ -156,11 +162,12 @@ function ProductModal({
                   <div className="mb-5">
                       <label htmlFor="fileInput" className="form-label"> 圖片上傳 </label>
                       <input
-                      onChange={handleFileChange}
+                        onChange={handleFileChange}
                         type="file"
                         accept=".jpg,.jpeg,.png"
                         className="form-control"
                         id="fileInput"
+                        ref={fileInputRef}
                       />
                     </div>
                     <label htmlFor="primary-image" className="form-label">
@@ -272,6 +279,21 @@ function ProductModal({
                     />
                   </div>
 
+                  <div className="mb-3">
+                    <label htmlFor="country" className="form-label">
+                      產地
+                    </label>
+                    <input
+                      value={modalData.country}
+                      onChange={handleModalInputChange}
+                      name="country"
+                      id="country"
+                      type="text"
+                      className="form-control"
+                      placeholder="請輸入產地"
+                    />
+                  </div>
+
                   <div className="row g-3 mb-3">
                     <div className="col-6">
                       <label htmlFor="origin_price" className="form-label">
@@ -285,6 +307,7 @@ function ProductModal({
                         type="number"
                         className="form-control"
                         placeholder="請輸入原價"
+                        min="0"
                       />
                     </div>
                     <div className="col-6">
@@ -299,6 +322,7 @@ function ProductModal({
                         type="number"
                         className="form-control"
                         placeholder="請輸入售價"
+                        min="0"
                       />
                     </div>
                   </div>
