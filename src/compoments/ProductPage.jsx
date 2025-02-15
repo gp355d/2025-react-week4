@@ -16,7 +16,8 @@ const defaultModalState = {
   description: "",
   content: "",
   is_enabled: 0,
-  imagesUrl: [""]
+  imagesUrl: [""],
+  country: "",
 };
 
 function ProductPage() {
@@ -46,11 +47,14 @@ function ProductPage() {
 
   //判斷是編輯還是新增商品的動作，並傳入input的值
   const handleOpenProductModal = (mode, product) => {
+    // console.log({...defaultModalState});
+    // console.log(product);
+    
     setModalMode(mode);
     if (mode === 'edit') {
-      setTempProduct(product);
+      setTempProduct({...product});
     } else {
-      setTempProduct(defaultModalState);
+      setTempProduct({...defaultModalState});//偵測到tempProduct的變動
     }
     setIsProductModalOpen(true);
   };
@@ -62,9 +66,6 @@ function ProductPage() {
   
   //分頁
   const [pageInfo, setPageInfo] = useState({}); // 設定儲存分頁資料的狀態
-  const handlePageChange = (page) => {
-    getProducts(page); //將頁數資料傳入
-  };
 
   return (
     <>
@@ -132,7 +133,7 @@ function ProductPage() {
             </table>
           </div>
           {/* 分頁元件 */}
-          <Pagination pageInfo={pageInfo} handlePageChange={handlePageChange} />
+          <Pagination pageInfo={pageInfo} onPageChange={getProducts} />
         </div>
       </div>
       {/* 產品Modal元件 */}
